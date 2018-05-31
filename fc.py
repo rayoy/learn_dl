@@ -2,14 +2,13 @@
 # -*- coding: UTF-8 -*-
 
 
-import random
 import numpy as np
-from activators import SigmoidActivator, IdentityActivator
+from activators import SigmoidActivator
 
 
 # 全连接层实现类
 class FullConnectedLayer(object):
-    def __init__(self, input_size, output_size, 
+    def __init__(self, input_size, output_size,
                  activator):
         '''
         构造函数
@@ -22,7 +21,7 @@ class FullConnectedLayer(object):
         self.activator = activator
         # 权重数组W
         self.W = np.random.uniform(-0.1, 0.1,
-            (output_size, input_size))
+                                   (output_size, input_size))
         # 偏置项b
         self.b = np.zeros((output_size, 1))
         # 输出向量
@@ -70,7 +69,7 @@ class Network(object):
         for i in range(len(layers) - 1):
             self.layers.append(
                 FullConnectedLayer(
-                    layers[i], layers[i+1],
+                    layers[i], layers[i + 1],
                     SigmoidActivator()
                 )
             )
@@ -96,8 +95,8 @@ class Network(object):
         '''
         for i in range(epoch):
             for d in range(len(data_set)):
-                self.train_one_sample(labels[d], 
-                    data_set[d], rate)
+                self.train_one_sample(labels[d],
+                                      data_set[d], rate)
 
     def train_one_sample(self, label, sample, rate):
         self.predict(sample)
@@ -141,16 +140,16 @@ class Network(object):
         for fc in self.layers:
             for i in range(fc.W.shape[0]):
                 for j in range(fc.W.shape[1]):
-                    fc.W[i,j] += epsilon
+                    fc.W[i, j] += epsilon
                     output = self.predict(sample_feature)
                     err1 = self.loss(sample_label, output)
-                    fc.W[i,j] -= 2*epsilon
+                    fc.W[i, j] -= 2 * epsilon
                     output = self.predict(sample_feature)
                     err2 = self.loss(sample_label, output)
                     expect_grad = (err1 - err2) / (2 * epsilon)
-                    fc.W[i,j] += epsilon
+                    fc.W[i, j] += epsilon
                     print 'weights(%d,%d): expected - actural %.4e - %.4e' % (
-                        i, j, expect_grad, fc.W_grad[i,j])
+                        i, j, expect_grad, fc.W_grad[i, j])
 
 
 from bp import train_data_set
@@ -176,10 +175,11 @@ class Normalizer(object):
         return np.array(data).reshape(8, 1)
 
     def denorm(self, vec):
-        binary = map(lambda i: 1 if i > 0.5 else 0, vec[:,0])
+        binary = map(lambda i: 1 if i > 0.5 else 0, vec[:, 0])
         for i in range(len(self.mask)):
             binary[i] = binary[i] * self.mask[i]
-        return reduce(lambda x,y: x + y, binary)
+        return reduce(lambda x, y: x + y, binary)
+
 
 def train_data_set():
     normalizer = Normalizer()
@@ -190,6 +190,7 @@ def train_data_set():
         data_set.append(n)
         labels.append(n)
     return labels, data_set
+
 
 def correct_ratio(network):
     normalizer = Normalizer()

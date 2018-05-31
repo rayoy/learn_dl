@@ -29,7 +29,8 @@ class Node(object):
         self.upstream.append(conn)
 
     def calc_output(self):
-        output = reduce(lambda ret, conn: ret + conn.upstream_node.output * conn.weight, self.upstream, 0)
+        output = reduce(lambda ret, conn: ret + conn.upstream_node.output * conn.weight,
+                        self.upstream, 0)
         self.output = sigmoid(output)
 
     def calc_hidden_layer_delta(self):
@@ -42,10 +43,11 @@ class Node(object):
         self.delta = self.output * (1 - self.output) * (label - self.output)
 
     def __str__(self):
-        node_str = '%u-%u: output: %f delta: %f' % (self.layer_index, self.node_index, self.output, self.delta)
+        node_str = '%u-%u: output: %f delta: %f' % (
+        self.layer_index, self.node_index, self.output, self.delta)
         downstream_str = reduce(lambda ret, conn: ret + '\n\t' + str(conn), self.downstream, '')
         upstream_str = reduce(lambda ret, conn: ret + '\n\t' + str(conn), self.upstream, '')
-        return node_str + '\n\tdownstream:' + downstream_str + '\n\tupstream:' + upstream_str 
+        return node_str + '\n\tdownstream:' + downstream_str + '\n\tupstream:' + upstream_str
 
 
 class ConstNode(object):
@@ -110,10 +112,10 @@ class Connection(object):
 
     def __str__(self):
         return '(%u-%u) -> (%u-%u) = %f' % (
-            self.upstream_node.layer_index, 
+            self.upstream_node.layer_index,
             self.upstream_node.node_index,
-            self.downstream_node.layer_index, 
-            self.downstream_node.node_index, 
+            self.downstream_node.layer_index,
+            self.downstream_node.node_index,
             self.weight)
 
 
@@ -134,18 +136,16 @@ class Network(object):
         self.connections = Connections()
         self.layers = []
         layer_count = len(layers)
-        node_count = 0;
         for i in range(layer_count):
             self.layers.append(Layer(i, layers[i]))
         for layer in range(layer_count - 1):
-            connections = [Connection(upstream_node, downstream_node) 
+            connections = [Connection(upstream_node, downstream_node)
                            for upstream_node in self.layers[layer].nodes
                            for downstream_node in self.layers[layer + 1].nodes[:-1]]
             for conn in connections:
                 self.connections.add_connection(conn)
                 conn.downstream_node.append_upstream_connection(conn)
                 conn.upstream_node.append_downstream_connection(conn)
-
 
     def train(self, labels, data_set, rate, epoch):
         for i in range(epoch):
@@ -207,15 +207,15 @@ class Normalizer(object):
         binary = map(lambda i: 1 if i > 0.5 else 0, vec)
         for i in range(len(self.mask)):
             binary[i] = binary[i] * self.mask[i]
-        return reduce(lambda x,y: x + y, binary)
+        return reduce(lambda x, y: x + y, binary)
 
 
 def mean_square_error(vec1, vec2):
-    return 0.5 * reduce(lambda a, b: a + b, 
+    return 0.5 * reduce(lambda a, b: a + b,
                         map(lambda v: (v[0] - v[1]) * (v[0] - v[1]),
                             zip(vec1, vec2)
+                            )
                         )
-                 )
 
 
 def gradient_check(network, sample_feature, sample_label):
@@ -227,30 +227,30 @@ def gradient_check(network, sample_feature, sample_label):
     '''
     # 计算网络误差
     network_error = lambda vec1, vec2: \
-            0.5 * reduce(lambda a, b: a + b, 
-                      map(lambda v: (v[0] - v[1]) * (v[0] - v[1]),
-                          zip(vec1, vec2)))
+        0.5 * reduce(lambda a, b: a + b,
+                     map(lambda v: (v[0] - v[1]) * (v[0] - v[1]),
+                         zip(vec1, vec2)))
 
     # 获取网络在当前样本下每个连接的梯度
     network.get_gradient(sample_feature, sample_label)
 
     # 对每个权重做梯度检查    
-    for conn in network.connections.connections: 
+    for conn in network.connections.connections:
         # 获取指定连接的梯度
         actual_gradient = conn.get_gradient()
-    
+
         # 增加一个很小的值，计算网络的误差
         epsilon = 0.0001
         conn.weight += epsilon
         error1 = network_error(network.predict(sample_feature), sample_label)
-    
+
         # 减去一个很小的值，计算网络的误差
-        conn.weight -= 2 * epsilon # 刚才加过了一次，因此这里需要减去2倍
+        conn.weight -= 2 * epsilon  # 刚才加过了一次，因此这里需要减去2倍
         error2 = network_error(network.predict(sample_feature), sample_label)
-    
+
         # 根据式6计算期望的梯度值
         expected_gradient = (error2 - error1) / (2 * epsilon)
-    
+
         # 打印
         print 'expected gradient: \t%f\nactual gradient: \t%f' % (
             expected_gradient, actual_gradient)
@@ -282,7 +282,7 @@ def test(network, data):
 
 def correct_ratio(network):
     normalizer = Normalizer()
-    correct = 0.0;
+    correct = 0.0
     for i in range(256):
         if normalizer.denorm(network.predict(normalizer.norm(i))) == i:
             correct += 1.0

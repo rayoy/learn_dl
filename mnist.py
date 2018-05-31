@@ -119,7 +119,7 @@ def show(sample):
     str = ''
     for i in range(28):
         for j in range(28):
-            if sample[i*28+j] != 0:
+            if sample[i * 28 + j] != 0:
                 str += '*'
             else:
                 str += ' '
@@ -162,8 +162,9 @@ def train_and_evaluate():
     while True:
         epoch += 1
         network.train(train_labels, train_data_set, 0.01, 1)
-        print '%s epoch %d finished, loss %f' % (now(), epoch, 
-            network.loss(train_labels[-1], network.predict(train_data_set[-1])))
+        print '%s epoch %d finished, loss %f' % (now(), epoch,
+                                                 network.loss(train_labels[-1],
+                                                              network.predict(train_data_set[-1])))
         if epoch % 2 == 0:
             error_ratio = evaluate(network, test_data_set, test_labels)
             print '%s after epoch %d, error ratio is %f' % (now(), epoch, error_ratio)
@@ -172,7 +173,6 @@ def train_and_evaluate():
             else:
                 last_error_ratio = error_ratio
 
+
 if __name__ == '__main__':
     train_and_evaluate()
-
-
